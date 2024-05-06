@@ -8,18 +8,21 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ScreenHandler {
-    private String title;
     private final Terminal terminal;
     private TerminalSize terminalSize;
     private final Screen screen;
-    private int screenWidth;
-    private int startColumn;
     private TextGraphics textGraphics;
+    private UITextHeader uiTextHeader;
+    private int screenWidth;
+    private int screenHeight;
+    int currentColumn = 0;
+    int currentRow = 1;
+    private List<String> lines;
 
-    public ScreenHandler(String title){
-        this.title = title;
+    public ScreenHandler(){
         try {
             this.terminal = new DefaultTerminalFactory().createTerminal();
             this.screen = new TerminalScreen(terminal);
@@ -29,23 +32,42 @@ public class ScreenHandler {
         }
     }
 
-    public void displayScreen(){
+    public void displayScreen(List<String> lines, String fileName) {
         if (this.screen == null) {
             System.err.println("Screen not initialized.");
             return;
         }
         terminalSize = screen.getTerminalSize();
         screenWidth = terminalSize.getColumns();
-
-        startColumn = (screenWidth - title.length()) / 2;
+        screenHeight = terminalSize.getRows();
         textGraphics = screen.newTextGraphics();
-        textGraphics.setBackgroundColor(TextColor.ANSI.BLUE);
-        textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
-        textGraphics.fillRectangle(new TerminalPosition(0, 0), new TerminalSize(screen.getTerminalSize().getColumns(), 1), ' ');
-        textGraphics.putString(new TerminalPosition(1, 0), "Zidi 1.0.1", SGR.BOLD);
-        textGraphics.putString(new TerminalPosition(startColumn, 0), title);
+
+        uiTextHeader = new UITextHeader(fileName, textGraphics, screenWidth);
+        uiTextHeader.displayHeader(screen);
+
         textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
-        textGraphics.setForegroundColor(TextColor.ANSI.DEFAULT);
+        textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
+
+        currentRow = 1;
+
+        for (String line : lines) {
+            int startIdx = 0;
+            while (startIdx < line.length()) {
+                int endIdx = Math.min(startIdx + screenWidth, line.length());
+                String part = line.substring(startIdx, endIdx);
+
+                textGraphics.putString(0, currentRow, part);
+                currentRow++;
+                startIdx += screenWidth;
+            }
+        }
+        currentRow = 1;
+        currentColumn = 0;
+        screen.setCursorPosition(new TerminalPosition(currentColumn, currentRow));
+
+        StatusBar statusBar = new StatusBar(textGraphics, screenHeight);
+        statusBar.displayStatusBar(screen);
+
 
         try {
             screen.refresh();
@@ -54,15 +76,6 @@ public class ScreenHandler {
         }
     }
 
-    public void changeTitle(String str){
-        this.title = str;
-        try {
-            textGraphics.putString(new TerminalPosition(startColumn, 0), title);
-            screen.refresh();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public Screen getScreen() {
         return screen;

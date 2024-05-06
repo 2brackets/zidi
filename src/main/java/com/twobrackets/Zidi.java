@@ -12,6 +12,7 @@ public class Zidi {
         ScreenHandler screenHandler;
         List<String> lines;
         String Os = OSUtils.getOsName();
+        boolean isRunning = true;
         KeyStroke keyStroke;
         System.out.println("Starting Zidi On " + Os);
 
@@ -20,19 +21,18 @@ public class Zidi {
         } else {
             fileManager = new FileManager(null);
         }
-        screenHandler = new ScreenHandler(fileManager.getFileName());
-        screenHandler.displayScreen();
-        boolean running = true;
-        while (running) {
+        screenHandler = new ScreenHandler();
+        screenHandler.displayScreen(fileManager.getLines(), fileManager.getFileName());
+        while (isRunning) {
             try {
                 keyStroke = screenHandler.getScreen().pollInput();
                 if (keyStroke != null) {
                     switch (keyStroke.getKeyType()){
                         case Escape:
-                            running = false;
+                            isRunning = false;
+                            System.out.println("End Program");
                             break;
                         case Enter:
-                            screenHandler.changeTitle("NEW Title.exe");
                             System.out.println("New Title");
                             break;
                     }

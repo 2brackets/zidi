@@ -13,10 +13,10 @@ public class FileManager {
     private List<String> lines;
 
     public FileManager(String filePath) {
+        this.lines = new ArrayList<>();
         if (filePath == null || filePath.isEmpty()) {
             this.fileName = "untitled";
             this.filePath = null;
-            this.lines = new ArrayList<>();
         } else {
             this.filePath = Paths.get(filePath);
             this.fileName = this.filePath.getFileName().toString();
