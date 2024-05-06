@@ -16,11 +16,13 @@ public class ScreenHandler {
     private final Screen screen;
     private TextGraphics textGraphics;
     private UITextHeader uiTextHeader;
+    private StatusBar statusBar;
     private int screenWidth;
     private int screenHeight;
     int currentColumn = 0;
     int currentRow = 1;
     private List<String> lines;
+    private String currentLine;
 
     public ScreenHandler(){
         try {
@@ -45,9 +47,6 @@ public class ScreenHandler {
         uiTextHeader = new UITextHeader(fileName, textGraphics, screenWidth);
         uiTextHeader.displayHeader(screen);
 
-        textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
-        textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
-
         currentRow = 1;
 
         for (String line : lines) {
@@ -63,12 +62,14 @@ public class ScreenHandler {
         }
         currentRow = 1;
         currentColumn = 0;
+        currentLine = lines.get(0);
         screen.setCursorPosition(new TerminalPosition(currentColumn, currentRow));
 
-        StatusBar statusBar = new StatusBar(textGraphics, screenHeight);
+        statusBar = new StatusBar(textGraphics, screenHeight);
         statusBar.displayStatusBar(screen);
 
-
+        textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
+        textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
         try {
             screen.refresh();
         } catch (Exception e) {
@@ -76,6 +77,40 @@ public class ScreenHandler {
         }
     }
 
+    private void refresh(){
+        try {
+            statusBar.updateStatusBar(currentRow, currentColumn, screen);
+            screen.refresh();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateLineDisplay() {
+        String clearString = " ".repeat(screenWidth);
+        textGraphics.putString(0, currentRow, clearString);
+        textGraphics.putString(0, currentRow, currentLine);
+        screen.setCursorPosition(new TerminalPosition(currentColumn, currentRow));
+        refresh();
+    }
+
+     public void addChar(char c) {
+         if (currentColumn == currentLine.length()) {
+             currentLine += c;
+         } else {
+             currentLine = currentLine.substring(0, currentColumn) + c + currentLine.substring(currentColumn);
+         }
+         currentColumn++;
+         updateLineDisplay();
+     }
+
+     public void backSpace(){
+         if (currentColumn > 0) {
+             currentColumn--;
+             currentLine = currentLine.substring(0, currentColumn) + currentLine.substring(currentColumn + 1);
+             updateLineDisplay();
+         }
+     }
 
     public Screen getScreen() {
         return screen;

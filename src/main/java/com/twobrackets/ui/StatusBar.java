@@ -28,6 +28,8 @@ public class StatusBar {
         String colInfo = getColInfo();
         textGraphics.putString(new TerminalPosition(1, screenHeight - 1), rowInfo, SGR.BOLD);
         textGraphics.putString(new TerminalPosition(getColStartPosition(rowInfo), screenHeight - 1), colInfo, SGR.BOLD);
+        textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
+        textGraphics.setForegroundColor(TextColor.ANSI.DEFAULT);
     }
 
     public void setCurrentRow(int row){
@@ -35,6 +37,12 @@ public class StatusBar {
     }
     public void setCurrentCol(int col){
         currentCol = col;
+    }
+
+    public void updateStatusBar(int row, int col, Screen screen){
+        currentRow = row;
+        currentCol = col;
+        displayStatusBar(screen);
     }
 
     private String getRowInfo(){

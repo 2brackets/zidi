@@ -14,6 +14,7 @@ public class FileManager {
 
     public FileManager(String filePath) {
         this.lines = new ArrayList<>();
+        this.lines.add("");
         if (filePath == null || filePath.isEmpty()) {
             this.fileName = "untitled";
             this.filePath = null;

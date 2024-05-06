@@ -28,15 +28,15 @@ public class Zidi {
                 keyStroke = screenHandler.getScreen().pollInput();
                 if (keyStroke != null) {
                     switch (keyStroke.getKeyType()){
-                        case Escape:
-                            isRunning = false;
-                            System.out.println("End Program");
+                        case Character:
+                            char c = keyStroke.getCharacter();
+                            screenHandler.addChar(c);
                             break;
-                        case Enter:
-                            System.out.println("New Title");
-                            break;
+                        case Backspace:
+                            screenHandler.backSpace();
                     }
                 }
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
