@@ -15,12 +15,12 @@ public class ScreenHandler {
     private TerminalSize terminalSize;
     private final Screen screen;
     private TextGraphics textGraphics;
-    private UITextHeader uiTextHeader;
+    private Header header;
+    private Editor editor;
+    private StatusBar statusBar;
     private int screenWidth;
     private int screenHeight;
-    int currentColumn = 0;
-    int currentRow = 1;
-    private List<String> lines;
+    private boolean running = true;
 
     public ScreenHandler(){
         try {
@@ -41,34 +41,17 @@ public class ScreenHandler {
         screenWidth = terminalSize.getColumns();
         screenHeight = terminalSize.getRows();
         textGraphics = screen.newTextGraphics();
+        int screenColumns = screen.getTerminalSize().getColumns();
+        header = new Header(fileName, textGraphics, screenWidth);
+        header.displayHeader(screenColumns);
 
-        uiTextHeader = new UITextHeader(fileName, textGraphics, screenWidth);
-        uiTextHeader.displayHeader(screen);
+        editor = new Editor(lines,textGraphics,screenWidth,screenHeight);
+        editor.displayEditor();
 
-        textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
-        textGraphics.setForegroundColor(TextColor.ANSI.GREEN);
+        statusBar = new StatusBar(textGraphics, screenHeight);
+        statusBar.displayStatusBar(screenColumns);
 
-        currentRow = 1;
-
-        for (String line : lines) {
-            int startIdx = 0;
-            while (startIdx < line.length()) {
-                int endIdx = Math.min(startIdx + screenWidth, line.length());
-                String part = line.substring(startIdx, endIdx);
-
-                textGraphics.putString(0, currentRow, part);
-                currentRow++;
-                startIdx += screenWidth;
-            }
-        }
-        currentRow = 1;
-        currentColumn = 0;
-        screen.setCursorPosition(new TerminalPosition(currentColumn, currentRow));
-
-        StatusBar statusBar = new StatusBar(textGraphics, screenHeight);
-        statusBar.displayStatusBar(screen);
-
-
+        screen.setCursorPosition(new TerminalPosition(0, 1));
         try {
             screen.refresh();
         } catch (Exception e) {
@@ -76,9 +59,41 @@ public class ScreenHandler {
         }
     }
 
-
+    public void refresh(boolean clearScreen){
+        try {
+            int screenColumns = screen.getTerminalSize().getColumns();
+            int row = editor.getCurrentRow();
+            int column = editor.getCurrentColumn();
+            screen.setCursorPosition(new TerminalPosition(column, row));
+            if(clearScreen){
+                screen.clear();
+                header.displayHeader(screenColumns);
+                editor.displayEditor();
+            }
+            statusBar.updateStatusBar(row, column, screenColumns);
+            screen.refresh();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public Screen getScreen() {
         return screen;
+    }
+    public Editor getEditor(){
+        return editor;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void exit(){
+        try {
+            screen.close();
+            running = false;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

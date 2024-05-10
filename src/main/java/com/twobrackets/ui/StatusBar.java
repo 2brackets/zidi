@@ -20,21 +20,22 @@ public class StatusBar {
         this.screenHeight = screenHeight;
     }
 
-    public void displayStatusBar(Screen screen){
+    public void displayStatusBar(int screenColumns){
         textGraphics.setBackgroundColor(TextColor.ANSI.BLACK_BRIGHT);
         textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
-        textGraphics.fillRectangle(new TerminalPosition(0, screenHeight - 1), new TerminalSize(screen.getTerminalSize().getColumns(), 1), ' ');
+        textGraphics.fillRectangle(new TerminalPosition(0, screenHeight - 1), new TerminalSize(screenColumns, 1), ' ');
         String rowInfo = getRowInfo();
         String colInfo = getColInfo();
         textGraphics.putString(new TerminalPosition(1, screenHeight - 1), rowInfo, SGR.BOLD);
         textGraphics.putString(new TerminalPosition(getColStartPosition(rowInfo), screenHeight - 1), colInfo, SGR.BOLD);
+        textGraphics.setBackgroundColor(TextColor.ANSI.DEFAULT);
+        textGraphics.setForegroundColor(TextColor.ANSI.DEFAULT);
     }
 
-    public void setCurrentRow(int row){
+    public void updateStatusBar(int row, int col, int screenColumns){
         currentRow = row;
-    }
-    public void setCurrentCol(int col){
         currentCol = col;
+        displayStatusBar(screenColumns);
     }
 
     private String getRowInfo(){
