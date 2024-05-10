@@ -1,6 +1,7 @@
 package com.twobrackets;
 
 import com.googlecode.lanterna.input.KeyStroke;
+import com.twobrackets.events.InputHandler;
 import com.twobrackets.ui.ScreenHandler;
 
 import java.io.IOException;
@@ -10,9 +11,8 @@ public class Zidi {
     public static void main(String[] args) {
         FileManager fileManager;
         ScreenHandler screenHandler;
-        List<String> lines;
+        InputHandler inputHandler;
         String Os = OSUtils.getOsName();
-        boolean isRunning = true;
         KeyStroke keyStroke;
         System.out.println("Starting Zidi On " + Os);
 
@@ -23,20 +23,15 @@ public class Zidi {
         }
         screenHandler = new ScreenHandler();
         screenHandler.displayScreen(fileManager.getLines(), fileManager.getFileName());
-        while (isRunning) {
+        inputHandler = new InputHandler(screenHandler);
+
+        while (screenHandler.isRunning()) {
             try {
                 keyStroke = screenHandler.getScreen().pollInput();
                 if (keyStroke != null) {
-                    switch (keyStroke.getKeyType()){
-                        case Character:
-                            char c = keyStroke.getCharacter();
-                            screenHandler.addChar(c);
-                            break;
-                        case Backspace:
-                            screenHandler.backSpace();
-                    }
+                    inputHandler.input(keyStroke);
+                    fileManager.saved = false;
                 }
-
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

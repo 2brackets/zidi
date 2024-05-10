@@ -11,13 +11,14 @@ public class FileManager {
     private Path filePath;
     private String fileName;
     private List<String> lines;
+    public boolean saved = true;
 
     public FileManager(String filePath) {
         this.lines = new ArrayList<>();
-        this.lines.add("");
         if (filePath == null || filePath.isEmpty()) {
             this.fileName = "untitled";
             this.filePath = null;
+            this.lines.add("");
         } else {
             this.filePath = Paths.get(filePath);
             this.fileName = this.filePath.getFileName().toString();
