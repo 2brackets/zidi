@@ -22,4 +22,7 @@ public class OSUtils {
         return getOsName().startsWith("Mac");
     }
 
+    public static void resetOsName() {
+        osName = null;
+    }
 }

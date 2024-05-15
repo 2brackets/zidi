@@ -43,6 +43,10 @@ public class Editor {
         }
     }
 
+    public List<String> getLines(){
+        return lines;
+    }
+
     public int getCurrentRow() {
         return currentRow;
     }
